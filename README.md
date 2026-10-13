@@ -32,7 +32,9 @@ O jogo pausa quando a janela perde o foco. Os recordes de distância e dias comp
 
 ## Fidelidade e diferenças
 
-A proposta é preservar a apresentação em baixa resolução, a perspectiva da estrada, o painel, os controles e as regras centrais do clássico. A implementação usa Canvas em 160 × 210, apresentado em proporção 4:3, com pixels nítidos.
+A proposta é preservar a estética pixel art, a perspectiva da estrada, o painel, os controles e as regras centrais do clássico. A simulação usa coordenadas de 160 × 210, enquanto o desenho é feito em Canvas de **640 × 840**, apresentado em proporção 4:3. São quatro vezes mais resolução em cada dimensão para dar definição aos carros e ao cenário.
+
+Os carros têm pneus separados, detalhes de suspensão, cockpit, piloto, aerofólio, sombras e lanternas. O cenário inclui montanhas em camadas, faces iluminadas e sombreadas, nuvens, vegetação, neve e marcadores nas margens da pista. A arte é desenhada diretamente pelo código, sem imagens externas.
 
 **Esta versão é uma reimplementação, não um emulador e não uma cópia exata da ROM.** Pista, sequência de tráfego, sprites, paletas, física e sons foram reconstruídos. Cada dia dura 150 segundos; o tráfego é determinístico. Antes das bandeiras verdes, um adversário que ultrapassa o jogador de volta restaura uma unidade da meta; depois da classificação, as bandeiras permanecem até amanhecer.
 

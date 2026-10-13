@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#161616">
+<meta name="description" content="Enduro no navegador. Recriação do clássico Atari 2600, com ultrapassagens, gelo, neblina, noite e controles para teclado, celular e gamepad.">
+<title>Enduro — Atari 2600</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23718d35'/%3E%3Cpath fill='%23f4eed7' d='M14 3h4v5h4v12h3v7H7v-7h3V8h4z'/%3E%3Cpath fill='%23202028' d='M6 11h5v6H6zm15 0h5v6h-5zM4 22h6v7H4zm18 0h6v7h-6zM14 11h4v8h-4z'/%3E%3C/svg%3E">
+<style>
+:root{color-scheme:dark;--gold:#dfcb8e;--ink:#161616;--muted:#a09b91;--line:#48443b;--button:#272724;font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--ink);color:#e8e3d5;min-height:100svh;padding:22px 18px 18px}button,select{font:inherit}button{cursor:pointer}button:disabled{cursor:default;opacity:.4}button:focus-visible,select:focus-visible,canvas:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:4px}[hidden]{display:none!important}
+.page{max-width:900px;margin:0 auto}.masthead{display:flex;align-items:center;justify-content:space-between;gap:20px;max-width:760px;margin:0 auto 15px}.brand h1{font-size:27px;font-weight:900;letter-spacing:3px;line-height:1;margin:0;color:var(--gold)}.brand p{color:var(--muted);font-size:10px;letter-spacing:2px;margin:9px 0 0}.record{text-align:right;font-size:9px;letter-spacing:2px;color:var(--muted)}.record strong{display:block;font-size:20px;color:var(--gold);letter-spacing:3px;margin-top:5px}
+.console{display:flex;flex-direction:column;align-items:center;margin:0 auto;max-width:800px;background:var(--ink);padding:0 12px}.screen-frame{width:min(100%,calc((100svh - 260px)*1.33333),736px);min-width:260px;padding:10px 12px 12px;border:1px solid #3a3934;border-radius:10px;background:#090909;box-shadow:0 12px 30px #0005,0 1px 0 #555 inset}.screen-wrap{position:relative;width:100%;aspect-ratio:4/3;background:#000;overflow:hidden;border:2px solid #20201d}canvas{width:100%;height:100%;display:block;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none}.screen-caption{display:flex;justify-content:space-between;font-size:8px;letter-spacing:1.5px;padding-top:10px;color:#9c968b}.power{color:#be8155}.power:before{content:"";display:inline-block;width:5px;height:5px;margin-right:6px;border-radius:50%;background:#d76735}.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:#0a0a16cb;padding:24px;z-index:2}.overlay h2{color:#f1e8cb;font-size:clamp(21px,5vw,38px);letter-spacing:2px}.overlay p{line-height:1.7;font-size:12px;max-width:400px}.overlay button{background:var(--gold);border:0;color:#191919;font-weight:bold;padding:14px 22px;margin-top:14px}
+.status{height:30px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;letter-spacing:.5px;color:var(--gold);margin:6px 0 3px}.switches{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;width:100%}.switches button,.switches select{min-height:35px;border:1px solid var(--line);border-radius:3px;background:var(--button);color:#d4cebe;padding:8px 11px;font-size:10px;letter-spacing:.3px}.switches button:hover:not(:disabled){background:#39382f}.switches .primary{color:#181818;background:var(--gold);border-color:var(--gold);font-weight:800}.switches .primary:hover{background:#ecdbab!important}.options{display:flex;gap:17px;justify-content:center;flex-wrap:wrap;margin:13px 0 6px;color:var(--muted);font-size:10px}.options label{display:flex;align-items:center;gap:7px}.options select{color:#d9d3c4;background:#222;border:1px solid var(--line);border-radius:3px;font-size:10px;padding:6px 7px}.options select:disabled{opacity:.65}.help-button{color:var(--muted);background:none;border:0;text-decoration:underline;text-underline-offset:3px;font-size:10px;min-height:30px}.instructions{font-size:10px;color:var(--muted);text-align:center;line-height:1.9;margin:8px auto 0}.instructions kbd{color:#dcd6c7}.credits{max-width:740px;text-align:center;color:#74736c;font-size:9px;line-height:1.8;margin:16px auto 0}.credits a{color:#a39b86;text-decoration:none}.touch-controls{display:none;align-items:center;justify-content:space-between;width:min(100%,340px);padding:4px 13px 0;user-select:none;touch-action:none;-webkit-user-select:none}.dpad{display:grid;grid-template:repeat(3,34px)/repeat(3,38px);gap:3px}.touch-controls button{touch-action:none;-webkit-user-select:none;user-select:none;color:#e5dec9;background:#34332d;border:1px solid #69614f;border-radius:4px;font-size:19px;box-shadow:0 3px 0 #090909}.touch-controls button.held{background:#74663e;transform:translateY(2px);box-shadow:none}.up{grid-area:1/2}.left{grid-area:2/1}.right{grid-area:2/3}.down{grid-area:3/2}.dpad:after{content:"+";grid-area:2/2;display:grid;place-items:center;color:#49473c}.touch-controls .fire{width:76px;height:76px;border-radius:50%;background:#a23625;border:3px solid #d05c41;box-shadow:0 5px 0 #4b1b16;font-size:13px;font-weight:bold;letter-spacing:1px}.touch-controls .fire.held{background:#d4563f}.touch-caption{text-align:center;color:var(--muted);font-size:8px;margin:6px 0 0}
+.console:fullscreen{max-width:none;width:100%;height:100%;padding:12px;justify-content:center}.console:fullscreen .screen-frame{width:min(calc((100dvh - 140px)*1.33333),100%,1200px)}.console:fullscreen .options{display:none}.console:fullscreen .status{margin-top:0}.console:fullscreen .screen-caption{display:none}.console:fullscreen .touch-controls{display:none}
+dialog{max-width:530px;width:calc(100% - 34px);border:1px solid #74633b;background:#20201d;color:#e0d9c5;padding:26px;border-radius:6px;box-shadow:0 20px 60px #0008;font-size:12px;line-height:1.7}dialog::backdrop{background:#000b}dialog h2{font-size:20px;color:var(--gold);margin-top:0}dialog table{width:100%;border-collapse:collapse;margin:16px 0}dialog td{border-bottom:1px solid #464235;padding:6px 0}dialog td:first-child{color:var(--gold);padding-right:20px}dialog button{border:1px solid var(--gold);padding:10px 20px;background:var(--gold);color:#222;font-weight:bold}dialog .note{color:#aaa392;font-size:10px}.sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@media(pointer:coarse){.touch-controls{display:flex}.screen-frame{width:min(100%,calc((100svh - 350px)*1.33333),700px)}.instructions{display:none}.console:fullscreen .touch-controls{display:flex;position:absolute;bottom:14px;width:100%;max-width:none;left:0;padding:0 24px;pointer-events:none}.console:fullscreen .touch-controls button{pointer-events:auto}.console:fullscreen .switches{position:relative;z-index:3;width:50%}.console:fullscreen .screen-frame{width:min(calc((100dvh - 120px)*1.33333),100%,1000px)}}
+@media(max-width:600px){body{padding:14px 8px}.masthead{margin-bottom:12px;padding:0 8px}.brand h1{font-size:21px;letter-spacing:2px}.brand p{font-size:8px;letter-spacing:1.3px}.record strong{font-size:16px}.record{font-size:8px}.console{padding:0}.screen-frame{border-radius:6px;padding:5px 5px 8px;min-width:0}.screen-caption{font-size:7px;padding-top:6px}.switches{gap:5px}.switches button{font-size:9px;padding:7px 8px;min-height:34px}.options{gap:8px;margin-top:10px}.options label,.options select{font-size:9px}.status{font-size:9px;height:30px;margin-top:4px}.credits{font-size:8px;margin-top:12px}.touch-controls{padding-top:0}.touch-caption{display:none}}
+@media(max-height:520px) and (pointer:coarse){body{padding:8px}.masthead,.credits,.options,.instructions{display:none}.console{max-width:none}.screen-frame{width:calc((100svh - 92px)*1.33333)}.screen-caption{display:none}.status{height:20px;font-size:8px;margin:0}.touch-controls{position:fixed;left:0;bottom:35px;max-width:none;width:100%;padding:0 12px;pointer-events:none}.touch-controls button{pointer-events:auto}.switches{width:55%;z-index:3}.switches button{padding:6px;font-size:8px;min-height:27px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+
+.record small{display:block;font-size:8px;letter-spacing:1px;margin-top:5px;color:var(--muted)}
+.telemetry{display:flex;justify-content:space-between;width:100%;max-width:410px;margin:0 0 8px;font-size:10px;color:var(--muted);letter-spacing:1px;padding:0 12px}.telemetry span:last-child{color:var(--gold)}
+.touch-controls{width:min(100%,380px);padding-top:8px}.steering{display:grid;grid-template-columns:58px 58px;gap:8px}.steering button{height:45px}.steering .brake{grid-column:1/3;height:35px;font-size:11px;letter-spacing:1px}.touch-controls .fire{width:92px;height:92px;font-size:10px;letter-spacing:0}.options{margin:4px 0 0}.overlay h2{margin:0 0 8px}.overlay p{margin:8px 0}.overlay button{font-size:12px}.console:fullscreen .telemetry{margin-top:8px}.screen-wrap canvas:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+@media(pointer:coarse){.screen-frame{width:min(100%,calc((100svh - 390px)*1.33333),700px)}}
+@media(max-height:520px) and (pointer:coarse){.telemetry{display:none}.screen-frame{width:calc((100svh - 100px)*1.33333)}.touch-controls{width:100%;max-width:none}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <div class="brand"><h1>ENDURO</h1><p>ATARI 2600 · 1983</p></div>
+    <div class="record">SEU RECORDE<strong id="record">0.0 KM</strong><small id="recordDays">0 DIAS COMPLETOS</small></div>
+  </header>
+  <main class="console" id="console" aria-label="Enduro">
+    <div class="screen-frame">
+      <div class="screen-wrap">
+        <canvas id="screen" width="160" height="210" tabindex="0" role="img" aria-label="Enduro. Dirija com as setas esquerda e direita, acelere com espaço e freie com seta para baixo. O painel inferior mostra distância, dia e carros restantes." aria-describedby="status">Seu navegador precisa oferecer suporte a Canvas para jogar.</canvas>
+        <div class="overlay" id="overlay"><h2 id="overlayTitle">ENDURO</h2><p id="overlayText">200 carros. Um dia. Uma estrada sem fim.</p><button id="continue">LARGAR</button></div>
+      </div>
+      <div class="screen-caption"><span class="power">POWER</span><span>1 JOGADOR</span><span>VIDEO COMPUTER SYSTEM</span></div>
+    </div>
+    <p id="status" class="status">ESPAÇO OU INICIAR PARA JOGAR</p>
+    <div class="telemetry" aria-label="Condições da corrida"><span id="day">DIA 1</span><span id="weather">AMANHECER</span><span id="speed">000 KM/H</span></div>
+    <div class="switches" aria-label="Controles do jogo">
+      <button id="reset" class="primary" title="Enter: iniciar ou reiniciar">INICIAR</button>
+      <button id="pause" title="P: pausar ou continuar" disabled>PAUSAR</button>
+      <button id="sound" title="M: ativar ou desativar o som" aria-pressed="true">SOM: ON</button>
+      <button id="fullscreen" title="F: tela cheia">TELA CHEIA</button>
+    </div>
+    <div class="touch-controls" aria-label="Controles por toque">
+      <div><div class="steering"><button data-control="left" aria-label="Dirigir para a esquerda">◀</button><button data-control="right" aria-label="Dirigir para a direita">▶</button><button class="brake" data-control="brake" aria-label="Frear">FREIO</button></div><p class="touch-caption">DIREÇÃO / FREIO</p></div>
+      <div><button class="fire" data-control="accelerate" aria-label="Acelerar. Solte para manter a velocidade.">ACELERAR</button><p class="touch-caption">SOLTE PARA MANTER</p></div>
+    </div>
+    <div class="options"><button class="help-button" id="help">COMO JOGAR</button></div>
+  </main>
+  <p class="instructions"><kbd>← →</kbd> Direção &nbsp; <kbd>ESPAÇO</kbd> Acelerar &nbsp; <kbd>↓</kbd> Frear &nbsp; <kbd>P</kbd> Pausar<br>Ultrapasse 200 carros no primeiro dia e 300 nos seguintes. Soltar o acelerador mantém a velocidade.</p>
+  <footer class="credits">Recriação independente para navegador. Jogo original: Larry Miller / Activision, 1983.<br><a href="https://github.com/amnsalomon/enduro" target="_blank" rel="noopener noreferrer">CÓDIGO-FONTE NO GITHUB</a></footer>
+</div>
+<dialog id="helpDialog" aria-labelledby="helpTitle">
+  <h2 id="helpTitle">COMO JOGAR</h2>
+  <p>Uma corrida contra o amanhecer. Ultrapasse <strong>200 carros no primeiro dia</strong> e <strong>300 em cada dia seguinte</strong>. A distância percorrida é o seu placar.</p>
+  <table><tbody>
+    <tr><td>← → ou A / D</td><td>Dirigir para os lados</td></tr>
+    <tr><td>Espaço, ↑ ou W</td><td>Acelerar; solte para manter a velocidade</td></tr>
+    <tr><td>↓ ou S</td><td>Frear</td></tr>
+    <tr><td>P / Esc</td><td>Pausar / continuar</td></tr>
+    <tr><td>Enter / R</td><td>Iniciar uma nova corrida</td></tr>
+    <tr><td>M / F</td><td>Som / tela cheia</td></tr>
+  </tbody></table>
+  <p><strong>Bandeiras verdes:</strong> indicam que você cumpriu a meta. Continue correndo até amanhecer para avançar ao próximo dia. Se a meta não for cumprida a tempo, a corrida termina.</p>
+  <p><strong>Gelo:</strong> o carro demora mais a responder. <strong>Neblina:</strong> os adversários aparecem mais perto. <strong>Noite:</strong> só as lanternas dos outros carros ficam visíveis.</p>
+  <p><strong>Colisões:</strong> bater nos carros reduz bastante a velocidade. Sair para o acostamento também desacelera. Um carro que ultrapassa você de volta devolve uma unidade à meta, até as bandeiras verdes.</p>
+  <p><strong>Resistência:</strong> complete cinco dias para conquistar o troféu. O tráfego fica mais rápido e difícil com o passar dos dias.</p>
+  <p><strong>Celular:</strong> use a direção, o freio e o botão ACELERAR ao mesmo tempo. <strong>Controle USB/Bluetooth:</strong> direcional para virar, botão principal ou gatilho direito para acelerar, baixo ou gatilho esquerdo para frear e Start para pausar.</p>
+  <p class="note">O recorde fica salvo neste navegador. A corrida pausa ao trocar de aba. Cada dia dura 2 minutos e 30 segundos nesta versão. Pista, gráficos e sons foram reconstruídos; não é uma emulação da ROM original.</p>
+  <button id="closeHelp">ENTENDI</button>
+</dialog>
+<div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+<noscript><p style="text-align:center">Ative o JavaScript no navegador para jogar.</p></noscript>
+<script id="engine">
+/* Independent browser recreation. Original Enduro: Larry Miller / Activision, 1983. */
+(() => {
+  'use strict';
+  const W=160,H=210,HORIZON=52,ROAD_END=166,PLAYER_Y=143,VIEW_DISTANCE=340,DAY_SECONDS=150,MAX_SPEED=120;
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const noise=(n)=>{let x=Math.imul(n|0,374761393)+1983|0;x=Math.imul(x^(x>>>13),1274126177);return ((x^(x>>>16))>>>0)/4294967296;};
+  const PHASES=[
+    {from:0,to:.12,key:'dawn',name:'AMANHECER'},
+    {from:.12,to:.32,key:'day',name:'DIA'},
+    {from:.32,to:.46,key:'ice',name:'GELO'},
+    {from:.46,to:.59,key:'afternoon',name:'TARDE'},
+    {from:.59,to:.69,key:'sunset',name:'ENTARDECER'},
+    {from:.69,to:.86,key:'night',name:'NOITE'},
+    {from:.86,to:.96,key:'fog',name:'NEBLINA'},
+    {from:.96,to:1.01,key:'dawn',name:'AMANHECER'}
+  ];
+  function curveAt(distance){return Math.sin(distance/960)*.8+Math.sin(distance/470)*.22;}
+  class EnduroGame{
+    constructor(){this.reset();this.mode='title';}
+    reset(){
+      this.mode='ready';this.previousMode='playing';this.day=1;this.completedDays=0;
+      this.dayTime=0;this.elapsed=0;this.distance=0;this.kilometers=0;
+      this.speed=0;this.x=0;this.steerVelocity=0;this.curvature=0;
+      this.required=200;this.passed=0;this.totalPassed=0;this.qualified=false;
+      this.cars=[];this.rowId=0;this.events=[];this.crashTimer=0;this.collisions=0;
+      this.offroad=false;this.goalNotice=0;this.dayNotice=0;this.trophy=false;
+      this.previousPhase='dawn';this.ensureTraffic();
+    }
+    get remaining(){return this.qualified?0:Math.max(0,this.required-this.passed);}
+    get phase(){const t=this.dayTime/DAY_SECONDS;return PHASES.find(p=>t>=p.from&&t<p.to)||PHASES[0];}
+    get kph(){return Math.round(this.speed/MAX_SPEED*260);}
+    get trafficSpeed(){return 46+Math.min(this.day-1,10)*2.7;}
+    get visibility(){return this.phase.key==='fog'?100:VIEW_DISTANCE;}
+    emit(type,data={}){this.events.push({type,...data});}
+    takeEvents(){const e=this.events;this.events=[];return e;}
+    start(){if(this.mode==='ready'){this.mode='playing';this.emit('start');}}
+    pause(){if(this.mode==='playing'||this.mode==='ready'){this.previousMode=this.mode;this.mode='paused';this.emit('pause');}}
+    resume(){if(this.mode==='paused'){this.mode=this.previousMode;this.emit('resume');}}
+    ensureTraffic(){
+      let far=this.cars.length?Math.max(...this.cars.map(c=>c.rel)):38;
+      while(far<VIEW_DISTANCE+40){
+        const id=this.rowId++,r=noise(id*9+10),lanes=[-.66,0,.66];
+        const first=Math.min(2,Math.floor(noise(id*9+11)*3));
+        const selected=[first];
+        if(r<Math.min(.72,.45+this.day*.035))selected.push((first+1+(noise(id*9+12)>.5?1:0))%3);
+        const gap=31+noise(id*9+13)*13;far+=gap;
+        selected.forEach((lane,i)=>{
+          const key=id*2+i;
+          this.cars.push({id:key,rel:far+i*8,x:lanes[lane],baseX:lanes[lane],
+            speedOffset:(noise(key+341)-.5)*5,color:Math.floor(noise(key+73)*6),
+            counted:false,passDay:0,phase:noise(key+821)*6.28});
+        });
+      }
+    }
+    overtake(car){
+      if(car.counted)return;
+      car.counted=true;car.passDay=this.day;this.totalPassed++;
+      if(!this.qualified){
+        this.passed++;
+        if(this.passed>=this.required){this.qualified=true;this.goalNotice=4;this.emit('qualified');}
+      }
+      this.emit('pass');
+    }
+    losePass(car){
+      if(!car.counted)return;
+      if(car.passDay===this.day&&!this.qualified)this.passed=Math.max(0,this.passed-1);
+      car.counted=false;this.totalPassed=Math.max(0,this.totalPassed-1);
+    }
+    collide(car){
+      if(this.crashTimer>0)return;
+      this.collisions++;this.crashTimer=.85;this.speed*=.24;
+      const away=this.x===car.x?(car.id%2?1:-1):Math.sign(this.x-car.x);
+      this.x=clamp(this.x+away*.18,-1.22,1.22);this.steerVelocity=away*.7;
+      this.emit('collision');
+    }
+    finishDay(){
+      if(!this.qualified){this.mode='gameover';this.emit('gameover');return;}
+      this.completedDays++;this.day++;this.dayTime-=DAY_SECONDS;
+      this.required=300;this.passed=0;this.qualified=false;this.dayNotice=3;
+      if(this.completedDays>=5&&!this.trophy){this.trophy=true;this.emit('trophy');}
+      this.emit('newDay',{day:this.day});
+    }
+    step(dt,input={}){
+      if(!Number.isFinite(dt)||dt<=0)return;dt=Math.min(dt,1/30);
+      if(this.mode==='ready'&&input.accelerate)this.start();
+      if(this.mode!=='playing')return;
+      this.elapsed+=dt;this.dayTime+=dt;
+      this.crashTimer=Math.max(0,this.crashTimer-dt);
+      this.goalNotice=Math.max(0,this.goalNotice-dt);this.dayNotice=Math.max(0,this.dayNotice-dt);
+      const steering=clamp(Number(input.steer)||0,-1,1);
+      const phase=this.phase;
+      if(input.brake)this.speed=Math.max(0,this.speed-75*dt);
+      else if(input.accelerate&&this.crashTimer<.45)this.speed=Math.min(MAX_SPEED,this.speed+26*dt);
+      // No drag on the road: releasing the Atari fire button keeps the current speed.
+      this.curvature=curveAt(this.distance);
+      const targetSteer=steering*(phase.key==='ice'?1.8:2.45)*clamp(this.speed/32,0,1);
+      const response=phase.key==='ice'?2.0:12;
+      this.steerVelocity+=(targetSteer-this.steerVelocity)*Math.min(1,dt*response);
+      this.x+=this.steerVelocity*dt-this.curvature*(this.speed/MAX_SPEED)**2*.44*dt;
+      this.x=clamp(this.x,-1.22,1.22);this.offroad=Math.abs(this.x)>.91;
+      if(this.offroad){this.speed=Math.max(0,this.speed-40*dt);this.steerVelocity*=Math.max(0,1-dt*2);}
+      this.distance+=this.speed*dt;
+      this.kilometers+=this.speed/MAX_SPEED*260/3600*dt;
+      for(const car of this.cars){
+        const old=car.rel;
+        car.rel+=(this.trafficSpeed+car.speedOffset-this.speed)*dt;
+        car.x=clamp(car.baseX+Math.sin(this.elapsed*.6+car.phase)*Math.min(.13,Math.max(0,this.day-1)*.025),-.83,.83);
+        const crossing=Math.min(old,car.rel)<7&&Math.max(old,car.rel)>-7;
+        if(crossing&&Math.abs(car.x-this.x)<.205&&this.crashTimer<=0&&this.speed>4){this.collide(car);continue;}
+        if(old>-10&&car.rel<=-10)this.overtake(car);
+        if(old<=-10&&car.rel>-10)this.losePass(car);
+      }
+      this.cars=this.cars.filter(car=>car.rel>-115&&car.rel<VIEW_DISTANCE+220);
+      this.ensureTraffic();
+      if(phase.key!==this.previousPhase){this.previousPhase=phase.key;this.emit('weather',{phase:phase.key,name:phase.name});}
+      if(this.dayTime>=DAY_SECONDS)this.finishDay();
+    }
+  }
+  globalThis.Enduro={EnduroGame,W,H,HORIZON,ROAD_END,PLAYER_Y,VIEW_DISTANCE,DAY_SECONDS,MAX_SPEED,PHASES,curveAt,clamp,noise};
+})();
+</script>
+<script id="renderer">
+(() => {
+  'use strict';
+  const {W,H,HORIZON,ROAD_END,PLAYER_Y,DAY_SECONDS,clamp,noise}=Enduro;
+  const FONT={
+    '.':['0','0','0','0','1'],'0':['111','101','101','101','111'],'1':['010','110','010','010','111'],
+    '2':['111','001','111','100','111'],'3':['111','001','111','001','111'],
+    '4':['101','101','111','001','001'],'5':['111','100','111','001','111'],
+    '6':['111','100','111','101','111'],'7':['111','001','010','010','010'],
+    '8':['111','101','111','101','111'],'9':['111','101','111','001','111'],
+    'A':['010','101','111','101','101'],'B':['110','101','110','101','110'],
+    'C':['111','100','100','100','111'],'D':['110','101','101','101','110'],
+    'E':['111','100','110','100','111'],'F':['111','100','110','100','100'],
+    'G':['111','100','101','101','111'],'H':['101','101','111','101','101'],
+    'I':['111','010','010','010','111'],'J':['001','001','001','101','111'],
+    'K':['101','101','110','101','101'],'L':['100','100','100','100','111'],
+    'M':['10101','11111','10101','10101','10101'],'N':['1001','1101','1011','1001','1001'],
+    'O':['111','101','101','101','111'],'P':['111','101','111','100','100'],
+    'Q':['111','101','101','111','001'],'R':['110','101','110','101','101'],
+    'S':['111','100','111','001','111'],'T':['111','010','010','010','010'],
+    'U':['101','101','101','101','111'],'V':['101','101','101','101','010'],
+    'W':['10101','10101','10101','11111','01010'],'X':['101','101','010','101','101'],
+    'Y':['101','101','010','010','010'],'Z':['111','001','010','100','111'],
+    '/':['001','001','010','100','100'],'!':['1','1','1','0','1'],
+    '-':['000','000','111','000','000'],':':['0','1','0','1','0'],' ':['00','00','00','00','00']
+  };
+  const PALETTES={
+    dawn:{sky:['#292866','#875982','#c48b78','#e8bc61'],mountain:'#775e31',ground:'#718d35',road:'#718d35',edge:'#f0e8a9'},
+    day:{sky:['#6e9dd7','#82b4e7','#a0c9ed','#d1ddb3'],mountain:'#b88931',ground:'#80a63b',road:'#80a63b',edge:'#f2edb2'},
+    ice:{sky:['#8eacc6','#aec9db','#cbdce4','#e3e6df'],mountain:'#a7a898',ground:'#e8e9d6',road:'#e8e9d6',edge:'#838f8f'},
+    afternoon:{sky:['#4c85c8','#5f9acd','#81b1d5','#bbd9bc'],mountain:'#b3852c',ground:'#83a336',road:'#83a336',edge:'#f0e6ae'},
+    sunset:{sky:['#282249','#694475','#ad5966','#e39242'],mountain:'#70472d',ground:'#60682d',road:'#60682d',edge:'#e9c798'},
+    night:{sky:['#070710','#070710','#0a0b19','#111328'],mountain:'#070910',ground:'#101213',road:'#101213',edge:'#b4bec3'},
+    fog:{sky:['#b2b2a6','#b2b2a6','#b4b4a8','#b6b6aa'],mountain:'#b2b2a6',ground:'#adad9f',road:'#adad9f',edge:'#eeebd7'}
+  };
+  const CAR=[
+    '0000011100000','0000111110000','0022111112200','0022114112200',
+    '0000114110000','0000114110000','0001111111000','0021111111200',
+    '0221111111220','0223111113220','0221111111220','0022222222200'
+  ];
+  const COLORS=['#bd3b49','#295bba','#ddad3b','#8748a3','#378574','#d56d36'];
+  class EnduroRenderer{
+    constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});this.ctx.imageSmoothingEnabled=false;}
+    rect(x,y,w,h,color){this.ctx.fillStyle=color;this.ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
+    text(t,x,y,color='#f4ecd3',scale=1){
+      for(const ch of String(t).toUpperCase()){
+        const grid=FONT[ch]||FONT[' '];
+        grid.forEach((row,j)=>[...row].forEach((v,i)=>{
+          if(v!=='1')return;
+          const left=Math.round(x+i*scale),top=Math.round(y+j*scale);
+          this.rect(left,top,Math.round(x+(i+1)*scale)-left,Math.round(y+(j+1)*scale)-top,color);
+        }));
+        x+=(grid[0].length+1)*scale;
+      }
+    }
+    road(g,y){
+      const t=(y-HORIZON)/(PLAYER_Y-HORIZON);
+      return {center:80+g.curvature*30*Math.max(0,1-t)**2,half:4+51*t};
+    }
+    projection(g,car){
+      const scale=75/(75+Math.max(-19,car.rel));
+      const y=HORIZON+(PLAYER_Y-HORIZON)*scale;
+      const road=this.road(g,y);
+      return {x:road.center+car.x*road.half,y,scale};
+    }
+    car(x,y,s,color,night=false,player=false,braking=false){
+      if(night&&!player){
+        this.rect(x-4*s,y+2*s,Math.max(1,2*s),Math.max(1,s),'#ee493b');
+        this.rect(x+2*s,y+2*s,Math.max(1,2*s),Math.max(1,s),'#ee493b');return;
+      }
+      CAR.forEach((row,j)=>[...row].forEach((v,i)=>{
+        if(v==='0')return;
+        const fill=v==='1'?color:v==='2'?'#202028':v==='3'?(braking?'#ff382f':color):'#303b3d';
+        const left=Math.round(x+(i-6.5)*s),top=Math.round(y+(j-6)*s);
+        const right=Math.round(x+(i-5.5)*s),bottom=Math.round(y+(j-5)*s);
+        if(right>left&&bottom>top)this.rect(left,top,right-left,bottom-top,fill);
+      }));
+    }
+    flag(x,y,now){
+      this.rect(x,y,1,9,'#eeeece');this.rect(x+1,y,6,4,'#61c766');
+      if(Math.floor(now/300)%2)this.rect(x+5,y+4,2,1,'#61c766');
+    }
+    trophy(){
+      this.rect(20,173,10,2,'#e5bf58');this.rect(22,175,6,6,'#e5bf58');
+      this.rect(19,175,2,4,'#e5bf58');this.rect(29,175,2,4,'#e5bf58');
+      this.rect(24,181,2,6,'#e5bf58');this.rect(21,187,8,2,'#e5bf58');
+    }
+    draw(g,now=0,braking=false){
+      const p=PALETTES[g.phase.key],ctx=this.ctx;
+      this.rect(0,0,W,H,'#51295b');
+      for(let band=0;band<4;band++)this.rect(0,band*13,W,13,p.sky[band]);
+      if(g.phase.key==='night'){
+        for(let i=0;i<21;i++)this.rect(Math.floor(noise(i+800)*W),Math.floor(noise(i+920)*34)+3,1,1,i%3?'#747ea5':'#aab0c0');
+      }
+      const offset=Math.round(g.curvature*8);
+      for(let x=0;x<W;x+=2){
+        const peak=Math.max(0,15-Math.abs(x-(40+offset))*.48,21-Math.abs(x-(105+offset))*.50,9-Math.abs(x-(151+offset))*.42);
+        this.rect(x,HORIZON-peak,2,peak,p.mountain);
+      }
+      this.rect(0,HORIZON,W,ROAD_END-HORIZON,p.ground);
+      ctx.save();ctx.beginPath();ctx.rect(0,HORIZON,W,ROAD_END-HORIZON);ctx.clip();
+      for(let y=HORIZON;y<ROAD_END;y++){
+        const t=Math.max(.015,(y-HORIZON)/(PLAYER_Y-HORIZON)),road=this.road(g,y);
+        const z=75*(1/t-1),stripe=Math.floor((g.distance+z)/20)%2===0;
+        this.rect(road.center-road.half,y,road.half*2,1,p.road);
+        const width=y>110?2:1;
+        this.rect(road.center-road.half,y,width,1,p.edge);
+        this.rect(road.center+road.half-width,y,width,1,p.edge);
+        if(stripe){this.rect(road.center-road.half-2,y,1,1,p.edge);this.rect(road.center+road.half+1,y,1,1,p.edge);}
+      }
+      for(const car of [...g.cars].sort((a,b)=>b.rel-a.rel)){
+        if(car.rel>g.visibility||car.rel<-19)continue;
+        const pos=this.projection(g,car);
+        this.car(pos.x,pos.y,pos.scale,COLORS[car.color],g.phase.key==='night');
+      }
+      const player=this.road(g,PLAYER_Y);
+      const color=g.crashTimer>0&&Math.floor(now/65)%2?'#de8970':'#f8f4dc';
+      this.car(player.center+g.x*player.half,PLAYER_Y,1,color,false,true,braking);
+      ctx.restore();
+      // Low-resolution instrument cluster: odometer above day and passing quota.
+      this.rect(38,166,88,34,'#c0783e');this.rect(40,168,84,30,'#4a2456');
+      this.rect(40,168,84,1,'#edac6c');this.rect(40,197,84,1,'#944934');
+      const km=g.kilometers.toFixed(1).padStart(7,'0');
+      this.text(km,54,172,'#f6eed7',1.5);
+      this.text(String(g.day),52,187,'#f6eed7',1.4);
+      if(g.qualified){this.flag(95,185,now);this.flag(112,185,now);}
+      else this.text(String(g.remaining).padStart(3,'0'),94,187,'#f6eed7',1.4);
+      if(g.trophy)this.trophy();
+      this.text('ACTIVISION',60,203,'#d1b781');
+    }
+  }
+  globalThis.EnduroRenderer=EnduroRenderer;
+})();
+</script>
+<script id="app">
+(() => {
+  'use strict';
+  const $=id=>document.getElementById(id),g=new Enduro.EnduroGame();
+  const renderer=new EnduroRenderer($('screen')),keys=new Set(),touch=new Map();
+  const read=(k,fallback)=>{try{return localStorage.getItem(k)??fallback;}catch{return fallback;}};
+  const save=(k,v)=>{try{localStorage.setItem(k,String(v));}catch{/* Storage is optional. */}};
+  const number=k=>{const n=Number(read(k,'0'));return Number.isFinite(n)?Math.max(0,n):0;};
+  let best=number('enduro-best-km'),bestDays=Math.floor(number('enduro-best-days'));
+  let soundOn=read('enduro-sound','on')==='on',audio=null,osc=null,engineGain=null;
+  let started=false,lastMode='',previousTime=0,accumulator=0,lastSync=0;
+  let gamepadPause=false,gamepadAccelerate=false,helpWasRunning=false,lastRoadTone=0;
+  function announce(message){$('announcement').textContent=message;}
+  function soundInit(){
+    if(!soundOn)return;
+    try{
+      if(!audio){
+        const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;
+        audio=new Audio();osc=audio.createOscillator();engineGain=audio.createGain();
+        osc.type='sawtooth';osc.frequency.value=35;engineGain.gain.value=0;
+        osc.connect(engineGain);engineGain.connect(audio.destination);osc.start();
+      }
+      if(audio.state==='suspended')audio.resume().catch(()=>{});
+    }catch{/* Keep the race available when audio is blocked. */}
+  }
+  function tone(freq,duration=.08,type='square',volume=.04,end=freq){
+    if(!audio||!soundOn||audio.state!=='running')return;
+    const o=audio.createOscillator(),v=audio.createGain(),t=audio.currentTime;
+    o.type=type;o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(Math.max(15,end),t+duration);
+    v.gain.setValueAtTime(volume,t);v.gain.exponentialRampToValueAtTime(.001,t+duration);
+    o.connect(v);v.connect(audio.destination);o.start(t);o.stop(t+duration+.02);
+    o.onended=()=>{o.disconnect();v.disconnect();};
+  }
+  function soundStep(now){
+    if(!audio||!engineGain||!osc)return;
+    const racing=g.mode==='playing'&&soundOn;
+    engineGain.gain.setTargetAtTime(racing?.012+g.speed/120*.012:0,audio.currentTime,.04);
+    const gear=Math.min(3,Math.floor(g.speed/33)),rpm=32+g.speed*.9-gear*16;
+    osc.frequency.setTargetAtTime(rpm,audio.currentTime,.06);
+    if(racing&&g.offroad&&g.speed>5&&now-lastRoadTone>110){tone(52,.09,'square',.026,24);lastRoadTone=now;}
+  }
+  function record(persist=false){
+    best=Math.max(best,g.kilometers);bestDays=Math.max(bestDays,g.completedDays);
+    if(persist){save('enduro-best-km',best);save('enduro-best-days',bestDays);}
+  }
+  function clearInput(){keys.clear();touch.clear();document.querySelectorAll('[data-control]').forEach(b=>b.classList.remove('held'));}
+  function prepare(){
+    record(true);clearInput();soundInit();g.reset();started=true;accumulator=0;lastMode='';
+    announce('Primeiro dia. Ultrapasse 200 carros. Segure espaço ou acelerar para largar.');
+    sync();$('screen').focus({preventScroll:true});
+  }
+  function togglePause(){
+    if(g.mode==='paused'){g.resume();soundInit();}else g.pause();
+    clearInput();record(true);sync();$('screen').focus({preventScroll:true});
+  }
+  function toggleSound(){soundOn=!soundOn;save('enduro-sound',soundOn?'on':'off');if(soundOn)soundInit();sync();}
+  async function fullscreen(){
+    try{
+      if(document.fullscreenElement)await document.exitFullscreen();
+      else if($('console').requestFullscreen)await $('console').requestFullscreen();
+      else announce('Use o modo de tela cheia do seu navegador.');
+    }catch{announce('O navegador não permitiu tela cheia.');}
+  }
+  function input(){
+    const down=name=>[...touch.values()].includes(name);
+    let steer=(keys.has('ArrowRight')||keys.has('KeyD')||down('right')?1:0)-(keys.has('ArrowLeft')||keys.has('KeyA')||down('left')?1:0);
+    let accelerate=keys.has('Space')||keys.has('ArrowUp')||keys.has('KeyW')||down('accelerate');
+    let brake=keys.has('ArrowDown')||keys.has('KeyS')||down('brake');
+    let pads=[];try{pads=navigator.getGamepads?navigator.getGamepads():[];}catch{/* Some embedded browsers block gamepads. */}
+    const pad=Array.from(pads).find(Boolean);
+    if(pad&&!$('helpDialog').open&&!document.hidden){
+      const axis=Number(pad.axes[0])||0,padX=(pad.buttons[15]?.pressed?1:0)-(pad.buttons[14]?.pressed?1:0);
+      if(Math.abs(axis)>.18)steer=axis;else if(padX)steer=padX;
+      const gas=!!(pad.buttons[0]?.pressed||pad.buttons[7]?.pressed||pad.buttons[12]?.pressed);
+      accelerate=accelerate||gas;brake=brake||!!(pad.buttons[6]?.pressed||pad.buttons[13]?.pressed)||(pad.axes[1]||0)>.5;
+      const pause=!!pad.buttons[9]?.pressed;
+      if(pause&&!gamepadPause){if(!started||g.mode==='gameover')prepare();else togglePause();}
+      if(gas&&!gamepadAccelerate&&(!started||g.mode==='gameover'))prepare();
+      gamepadPause=pause;gamepadAccelerate=gas;
+    }else{gamepadPause=false;gamepadAccelerate=false;}
+    return {steer,accelerate,brake};
+  }
+  function processEvents(){
+    for(const e of g.takeEvents()){
+      if(e.type==='collision')tone(110,.35,'sawtooth',.075,22);
+      if(e.type==='qualified'){tone(660,.4,'square',.035,1320);announce('Meta cumprida! Mantenha a corrida até o próximo amanhecer.');}
+      if(e.type==='newDay'){tone(880,.35,'square',.035,1175);record(true);announce('Dia '+g.day+'. Agora ultrapasse 300 carros.');}
+      if(e.type==='trophy'){tone(1320,.7,'triangle',.06,1760);announce('Cinco dias completos! Troféu de resistência conquistado.');}
+      if(e.type==='weather')announce(e.name+(e.phase==='ice'?'. A direção fica escorregadia.':e.phase==='fog'?'. A visibilidade está reduzida.':e.phase==='night'?'. Siga as lanternas dos outros carros.':'.'));
+      if(e.type==='gameover'){tone(220,.7,'sawtooth',.04,55);clearInput();record(true);}
+    }
+  }
+  function sync(){
+    record();$('record').textContent=best.toFixed(1)+' KM';$('recordDays').textContent=bestDays+' DIAS COMPLETOS';
+    $('sound').textContent=soundOn?'SOM: ON':'SOM: OFF';$('sound').setAttribute('aria-pressed',String(soundOn));
+    const paused=g.mode==='paused',ended=g.mode==='gameover';
+    $('pause').textContent=paused?'CONTINUAR':'PAUSAR';$('pause').disabled=!started||ended;
+    $('reset').textContent=started?'REINICIAR':'INICIAR';
+    $('day').textContent='DIA '+g.day;$('weather').textContent=g.phase.name;$('speed').textContent=String(g.kph).padStart(3,'0')+' KM/H';
+    let message='ESPAÇO OU INICIAR PARA JOGAR';
+    if(g.mode==='ready')message='SEGURE ESPAÇO OU ACELERAR PARA LARGAR';
+    if(g.mode==='playing')message=g.qualified?'BANDEIRAS VERDES · CONTINUE ATÉ AMANHECER':g.dayNotice>0?'NOVO DIA · META: 300 ULTRAPASSAGENS':g.offroad?'VOLTE PARA A PISTA':g.remaining+' CARROS PARA A META';
+    if(paused)message='PAUSADO · P PARA CONTINUAR';
+    if(ended)message='O DIA AMANHECEU · FALTARAM '+g.remaining+' CARROS';
+    $('status').textContent=message;
+    $('overlay').hidden=!(paused||ended||!started);
+    if(!started){$('overlayTitle').textContent='ENDURO';$('overlayText').textContent='200 carros. Um dia. Uma estrada sem fim.';$('continue').textContent='LARGAR';}
+    if(paused){$('overlayTitle').textContent='PAUSADO';$('overlayText').textContent='A estrada espera por você.';$('continue').textContent='CONTINUAR';}
+    if(ended){$('overlayTitle').textContent='FIM DE CORRIDA';$('overlayText').textContent=g.kilometers.toFixed(1)+' km · '+g.completedDays+' dias completos · '+g.totalPassed+' ultrapassagens';$('continue').textContent='CORRER NOVAMENTE';}
+    if(g.mode!==lastMode){if(ended)announce($('overlayText').textContent+'. Fim de corrida.');lastMode=g.mode;}
+  }
+  function showHelp(){helpWasRunning=g.mode==='playing'||g.mode==='ready';g.pause();clearInput();sync();$('helpDialog').showModal();}
+  $('reset').addEventListener('click',prepare);$('pause').addEventListener('click',togglePause);
+  $('continue').addEventListener('click',()=>{if(g.mode==='paused')togglePause();else prepare();});
+  $('sound').addEventListener('click',toggleSound);$('fullscreen').addEventListener('click',fullscreen);
+  $('help').addEventListener('click',showHelp);$('closeHelp').addEventListener('click',()=>$('helpDialog').close());
+  $('helpDialog').addEventListener('close',()=>{if(helpWasRunning&&g.mode==='paused')g.resume();helpWasRunning=false;sync();$('screen').focus({preventScroll:true});});
+  document.addEventListener('keydown',e=>{
+    if(e.target instanceof HTMLInputElement||$('helpDialog').open)return;
+    if(e.target instanceof HTMLButtonElement&&(e.code==='Enter'||e.code==='Space'))return;
+    const codes=['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','KeyA','KeyD','KeyW','KeyS','Space','Enter','KeyR','KeyP','Escape','KeyM','KeyF'];
+    if(!codes.includes(e.code))return;e.preventDefault();
+    if(!e.repeat){
+      if(e.code==='Enter'||e.code==='KeyR'){prepare();return;}
+      if(e.code==='KeyP'||e.code==='Escape'){togglePause();return;}
+      if(e.code==='KeyM'){toggleSound();return;}
+      if(e.code==='KeyF'){fullscreen();return;}
+      if((!started||g.mode==='gameover')&&['Space','ArrowUp','KeyW'].includes(e.code))prepare();
+    }
+    keys.add(e.code);soundInit();
+  });
+  document.addEventListener('keyup',e=>keys.delete(e.code));
+  document.querySelectorAll('[data-control]').forEach(button=>{
+    button.addEventListener('pointerdown',e=>{
+      e.preventDefault();if(!started||g.mode==='gameover')prepare();soundInit();
+      button.setPointerCapture(e.pointerId);touch.set(e.pointerId,button.dataset.control);button.classList.add('held');
+    });
+    const release=e=>{touch.delete(e.pointerId);if(![...touch.values()].includes(button.dataset.control))button.classList.remove('held');};
+    ['pointerup','pointercancel','lostpointercapture'].forEach(name=>button.addEventListener(name,release));
+  });
+  function suspend(){clearInput();g.pause();record(true);sync();}
+  window.addEventListener('blur',suspend);
+  window.addEventListener('pagehide',()=>record(true));
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)suspend();});
+  document.addEventListener('fullscreenchange',()=>{$('fullscreen').textContent=document.fullscreenElement?'SAIR DA TELA CHEIA':'TELA CHEIA';});
+  function frame(now){
+    const elapsed=previousTime?Math.min((now-previousTime)/1000,.1):0;previousTime=now;
+    const controls=input();accumulator+=elapsed;
+    while(accumulator>=1/60){g.step(1/60,controls);accumulator-=1/60;}
+    processEvents();renderer.draw(g,now,controls.brake);soundStep(now);
+    if(now-lastSync>100||g.mode!==lastMode){sync();lastSync=now;}
+    requestAnimationFrame(frame);
+  }
+  sync();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

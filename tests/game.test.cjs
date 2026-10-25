@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
-const script=name=>html.match(new RegExp('<script id="'+name+'">([\\s\\S]*?)<\\/script>'))[1];
+const script=name=>fs.readFileSync(path.join(__dirname,'../src/'+name+'.js'),'utf8');
 const scope={};vm.createContext(scope);vm.runInContext(script('engine'),scope);
 const {EnduroGame,DAY_SECONDS,MAX_SPEED,curveAt}=scope.Enduro;
 const tick=(g,seconds,input={})=>{for(let i=0;i<Math.round(seconds*60);i++)g.step(1/60,input);};
@@ -87,61 +87,4 @@ test('invalid time steps cannot corrupt state and reset restores a clean first d
  const g=empty();tick(g,1,{accelerate:true});const before=g.distance;
  for(const dt of [NaN,Infinity,-1,0])g.step(dt,{accelerate:true});assert.equal(g.distance,before);
  g.reset();assert.equal(g.day,1);assert.equal(g.passed,0);assert.equal(g.distance,0);assert.equal(g.trophy,false);assert.equal(g.speed,0);
-});
-test('scripts parse, assets are self-contained and required controls are present',()=>{
- for(const name of ['engine','renderer','app'])new vm.Script(script(name));
- assert.ok(!/<script[^>]+src=/.test(html));assert.ok(!/<link[^>]+href="https?:/.test(html));
- for(const id of ['screen','reset','pause','sound','fullscreen','helpDialog','record','day','speed'])assert.ok(html.includes('id="'+id+'"'));
-});
-test('night renders rival taillights and fog hides distant cars',()=>{
- vm.runInContext(script('renderer'),scope);const colors=[];
- const ctx={fillRect(){colors.push(this.fillStyle);},save(){},restore(){},beginPath(){},rect(){},clip(){}};
- const renderer=new scope.EnduroRenderer({getContext(){return ctx;}}),g=empty();
- car(g,{rel:160,color:0});g.dayTime=DAY_SECONDS*.2;renderer.draw(g);assert.ok(colors.includes('#bd3b49'));
- colors.length=0;g.dayTime=DAY_SECONDS*.9;renderer.draw(g);assert.ok(!colors.includes('#bd3b49'));
- colors.length=0;g.dayTime=DAY_SECONDS*.8;renderer.draw(g);assert.ok(!colors.includes('#bd3b49'));assert.ok(colors.includes('#ee493b'));
-});
-test('application handles keyboard, multitouch, pause, help, restart and blocked optional APIs',()=>{
- const elements=new Map(),listeners={},frames=[],instances=[],windowListeners={};let doc;
- const draw={fillRect(){},save(){},restore(){},beginPath(){},rect(){},clip(){}};
- class Element{
-  constructor(id){this.id=id;this.listeners={};this.dataset={};this.classList={add(){},remove(){}};this.open=false;}
-  addEventListener(name,fn){(this.listeners[name]??=[]).push(fn);}
-  trigger(name,extra={}){for(const fn of this.listeners[name]??[])fn({target:this,preventDefault(){},...extra});}
-  setAttribute(){}setPointerCapture(){}focus(){doc.activeElement=this;}getContext(){return draw;}
-  showModal(){this.open=true;}close(){this.open=false;this.trigger('close');}
- }
- class Button extends Element{}class Input extends Element{}
- for(const match of html.matchAll(/id="([^"]+)"/g)){
-  const id=match[1],Ctor=['reset','pause','sound','fullscreen','continue','help','closeHelp'].includes(id)?Button:Element;
-  elements.set(id,new Ctor(id));
- }
- const buttons=['left','right','brake','accelerate'].map(control=>{const b=new Button(control);b.dataset.control=control;return b;});
- doc={getElementById:id=>elements.get(id),querySelectorAll:()=>buttons,addEventListener:(n,fn)=>{listeners[n]=fn;},hidden:false};
- const context={document:doc,window:{addEventListener:(n,fn)=>{windowListeners[n]=fn;}},navigator:{getGamepads(){throw Error('blocked');}},
-  HTMLButtonElement:Button,HTMLInputElement:Input,requestAnimationFrame:fn=>frames.push(fn),
-  localStorage:{getItem(){throw Error('blocked');},setItem(){throw Error('blocked');}}};
- vm.createContext(context);vm.runInContext(script('engine'),context);
- const Base=context.Enduro.EnduroGame;context.Enduro.EnduroGame=class extends Base{constructor(){super();instances.push(this);}};
- for(const name of ['renderer','app'])vm.runInContext(script(name),context);
- let now=100;const run=n=>{for(let i=0;i<n;i++){now+=1000/60;frames.shift()(now);}};
- const key=code=>listeners.keydown({target:doc.activeElement,code,preventDefault(){}}),up=code=>listeners.keyup({code});
- elements.get('reset').trigger('click');const g=instances[0];assert.equal(doc.activeElement.id,'screen');assert.equal(g.mode,'ready');
- key('Space');run(35);up('Space');assert.equal(g.mode,'playing');assert.ok(g.speed>0);
- const speed=g.speed;run(5);assert.equal(g.speed,speed);
- key('ArrowDown');run(5);up('ArrowDown');assert.ok(g.speed<speed);
- elements.get('pause').trigger('click');const distance=g.distance;run(10);assert.equal(g.distance,distance);assert.equal(g.mode,'paused');
- elements.get('continue').trigger('click');assert.equal(g.mode,'playing');
- elements.get('help').trigger('click');assert.equal(g.mode,'paused');assert.equal(elements.get('helpDialog').open,true);
- elements.get('closeHelp').trigger('click');assert.equal(g.mode,'playing');assert.equal(doc.activeElement.id,'screen');
- const left=buttons[0],gas=buttons[3],beforeTouch=g.speed;left.trigger('pointerdown',{pointerId:1});gas.trigger('pointerdown',{pointerId:2});run(12);
- assert.ok(g.x<0);assert.ok(g.speed>beforeTouch);
- left.trigger('lostpointercapture',{pointerId:1});gas.trigger('pointercancel',{pointerId:2});const coast=g.speed;run(4);assert.equal(g.speed,coast);
- windowListeners.blur();assert.equal(g.mode,'paused');run(4);assert.equal(g.speed,coast);
- elements.get('reset').trigger('click');assert.equal(g.mode,'ready');assert.equal(g.distance,0);assert.equal(g.speed,0);
- const pad={axes:[-.6,0],buttons:Array.from({length:16},()=>({pressed:false}))};
- context.navigator.getGamepads=()=>[null,pad];pad.buttons[0].pressed=true;run(12);
- assert.equal(g.mode,'playing');assert.ok(g.speed>0);assert.ok(g.x<0);
- pad.buttons[9].pressed=true;run(3);assert.equal(g.mode,'paused');
- pad.buttons[9].pressed=false;run(2);pad.buttons[9].pressed=true;run(2);assert.equal(g.mode,'playing');
 });

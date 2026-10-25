@@ -4,7 +4,7 @@ const {EnduroGame}=require('../src/engine.js');const {EnduroRenderer}=require('.
 function canvas(width,height){const calls=[];const gradient=()=>({addColorStop(){}});const ctx={calls,drawImage(image,...args){calls.push({image,args});},createLinearGradient:gradient,createRadialGradient:gradient};for(const k of ['beginPath','moveTo','lineTo','closePath','fill','ellipse','fillRect','stroke','setTransform','scale','fillText'])ctx[k]=()=>{};return {width,height,clientWidth:960,getContext:()=>ctx};}
 function setup(){const c=canvas(1,1),r=new EnduroRenderer(c,{createCanvas:canvas}),g=new EnduroGame();g.reset();const spriteCalls=()=>c.getContext().calls.filter(x=>[...r.sprites.values()].includes(x.image));return {c,r,g,spriteCalls};}
 test('4K is native 3840x2160 with high-resolution sprites; HD and auto are selectable',()=>{
- const {c,r}=setup();assert.deepEqual([c.width,c.height],[3840,2160]);assert.deepEqual([r.sprites.values().next().value.width,r.sprites.values().next().value.height],[448,672]);r.setQuality('hd');assert.deepEqual([c.width,c.height],[1920,1080]);r.setQuality('auto',1);assert.deepEqual([c.width,c.height],[960,540]);
+ const {c,r}=setup();assert.deepEqual([c.width,c.height],[3840,2160]);assert.deepEqual([r.sprites.values().next().value.width,r.sprites.values().next().value.height],[512,320]);r.setQuality('hd');assert.deepEqual([c.width,c.height],[1920,1080]);r.setQuality('auto',1);assert.deepEqual([c.width,c.height],[960,540]);
 });
 test('night hides rival bodies, vision reveals them and fog limits distance',()=>{
  const {c,r,g,spriteCalls}=setup();g.dayTime=120;r.draw(g);assert.equal(spriteCalls().length,1);c.getContext().calls.length=0;g.applyCode('FAROL');r.draw(g);assert.ok(spriteCalls().length>1);
